@@ -20,8 +20,8 @@ def test_get_single_post(api_request_context):
 
 def test_create_post(api_request_context):
     payload = {
-        "title": "我的第一篇測試文章",
-        "body": "這是使用 Playwright 寫的 API 測試",
+        "title": "my first testing post",
+        "body": "this is my first post for testing",
         "userId": 1
     }
     response = api_request_context.post("/posts", data=payload)
@@ -33,11 +33,11 @@ def test_create_post(api_request_context):
 
 
 def test_update_post(api_request_context):
-    payload = {"title": "更新後的標題", "body": "更新內容", "userId": 1}
+    payload = {"title": "Updated Title", "body": "Updated Body", "userId": 1}
     response = api_request_context.put("/posts/1", data=payload)
     expect(response).to_be_ok()
     data = response.json()
-    assert data["title"] == "更新後的標題"
+    assert data["title"] == "Updated Title"
 
 
 def test_delete_post(api_request_context):
