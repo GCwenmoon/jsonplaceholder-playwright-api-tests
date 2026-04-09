@@ -37,3 +37,9 @@ playwright install
 ```bash
 pytest --headed 
 ```
+
+
+## Activate Jenkins
+```bash
+docker compose up -d
+```
