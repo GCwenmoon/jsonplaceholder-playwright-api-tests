@@ -1,13 +1,7 @@
 pipeline {
-    agent {
-        docker {
-            image 'mcr.microsoft.com/playwright/python:v1.58.0-noble'
-            args '--user root'
-        }
-    }
+    agent any   // 使用 Jenkins 本身容器執行，避免 docker permission 問題
 
     environment {
-        PYTHONPATH = "${WORKSPACE}"
         HOME = "${WORKSPACE}"
         PLAYWRIGHT_BROWSERS_PATH = "${WORKSPACE}/pw-browsers"
     }
@@ -19,14 +13,20 @@ pipeline {
             }
         }
 
-        stage('Setup & Install Dependencies') {
+        stage('Install Python & Dependencies') {
             steps {
                 sh '''
-                    python -m venv venv
+                    # 安裝 Python 和必要工具
+                    apt-get update -qq
+                    apt-get install -y python3 python3-venv python3-pip curl
+                    
+                    # 建立虛擬環境並安裝依賴
+                    python3 -m venv venv
                     . venv/bin/activate
                     pip install --upgrade pip
                     pip install -r requirements.txt
                     
+                    # 安裝 Playwright 瀏覽器（只裝 chromium，比較快）
                     playwright install --with-deps chromium
                 '''
             }
@@ -36,6 +36,7 @@ pipeline {
             steps {
                 sh '''
                     . venv/bin/activate
+                    
                     pytest tests/ \
                         --verbose \
                         --html=report.html \
@@ -53,10 +54,10 @@ pipeline {
             cleanWs()
         }
         success {
-            echo '🎉 Passed All Test'
+            echo '🎉Passed All Tested'
         }
         failure {
-            echo '❌ Test Failed!'
+            echo '❌ Tests Failed'
         }
     }
 }
