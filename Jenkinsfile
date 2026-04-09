@@ -2,7 +2,7 @@ pipeline {
     agent {
         docker {
             image 'mcr.microsoft.com/playwright/python:v1.58.0-noble' 
-            args '--user root -v /var/run/docker.sock:/var/run/docker.sock'
+            args '--user root --group-add $(stat -c "%g" /var/run/docker.sock)'
         }
     }
 
