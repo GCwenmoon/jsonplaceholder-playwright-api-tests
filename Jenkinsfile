@@ -1,14 +1,10 @@
 pipeline {
-    agent {
-        docker {
-            image 'mcr.microsoft.com/playwright/python:v1.58.0-noble'
-            args '--user root --group-add $(id -g $(stat -c "%U" /var/run/docker.sock))'
-        }
-    }
+    agent any
 
     environment {
         PYTHONPATH = "${WORKSPACE}"
         HOME = "${WORKSPACE}"
+        PLAYWRIGHT_BROWSERS_PATH = "${WORKSPACE}/pw-browsers"
     }
 
     stages {
@@ -18,21 +14,15 @@ pipeline {
             }
         }
 
-        stage('Setup Python Environment') {
+        stage('Setup Python & Install Dependencies') {
             steps {
                 sh '''
                     python -m venv venv
                     . venv/bin/activate
                     pip install --upgrade pip
                     pip install -r requirements.txt
-                '''
-            }
-        }
-
-        stage('Install Playwright Browsers') {
-            steps {
-                sh '''
-                    . venv/bin/activate
+                    
+                    # 安裝 Playwright 瀏覽器（只裝 chromium 較快）
                     playwright install --with-deps chromium
                 '''
             }
@@ -57,6 +47,12 @@ pipeline {
             junit testResults: 'test-results.xml', allowEmptyResults: true
             archiveArtifacts artifacts: 'report.html', allowEmptyArchive: true
             cleanWs()
+        }
+        success {
+            echo '🎉 Passed all tests'
+        }
+        failure {
+            echo '❌ Tests failed, please check the report'
         }
     }
 }
