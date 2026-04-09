@@ -16,17 +16,14 @@ pipeline {
         stage('Install Python & Dependencies') {
             steps {
                 sh '''
-                    # 安裝 Python 和必要工具
                     apt-get update -qq
                     apt-get install -y python3 python3-venv python3-pip curl
                     
-                    # 建立虛擬環境並安裝依賴
                     python3 -m venv venv
                     . venv/bin/activate
                     pip install --upgrade pip
                     pip install -r requirements.txt
                     
-                    # 安裝 Playwright 瀏覽器（只裝 chromium，比較快）
                     playwright install --with-deps chromium
                 '''
             }
@@ -49,15 +46,17 @@ pipeline {
 
     post {
         always {
-            junit testResults: 'test-results.xml', allowEmptyResults: true
+            junit testResults: 'test-results.xml', 
+                  allowEmptyResults: true, 
+                  keepLongStdio: true
+            
             archiveArtifacts artifacts: 'report.html', allowEmptyArchive: true
-            cleanWs()
         }
         success {
-            echo '🎉Passed All Tested'
+            echo '🎉 Passed all tests'
         }
         failure {
-            echo '❌ Tests Failed'
+            echo '❌ Build or Test Failed'
         }
     }
 }
