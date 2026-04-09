@@ -1,5 +1,10 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'mcr.microsoft.com/playwright/python:v1.58.0-noble'
+            args '--user root'
+        }
+    }
 
     environment {
         PYTHONPATH = "${WORKSPACE}"
@@ -14,7 +19,7 @@ pipeline {
             }
         }
 
-        stage('Setup Python & Install Dependencies') {
+        stage('Setup & Install Dependencies') {
             steps {
                 sh '''
                     python -m venv venv
@@ -22,7 +27,6 @@ pipeline {
                     pip install --upgrade pip
                     pip install -r requirements.txt
                     
-                    # 安裝 Playwright 瀏覽器（只裝 chromium 較快）
                     playwright install --with-deps chromium
                 '''
             }
@@ -49,10 +53,10 @@ pipeline {
             cleanWs()
         }
         success {
-            echo '🎉 Passed all tests'
+            echo '🎉 Passed All Test'
         }
         failure {
-            echo '❌ Tests failed, please check the report'
+            echo '❌ Test Failed!'
         }
     }
 }
