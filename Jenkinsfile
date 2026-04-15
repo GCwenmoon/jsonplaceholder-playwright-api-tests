@@ -1,5 +1,5 @@
 pipeline {
-    agent any   // 使用 Jenkins 本身容器執行，避免 docker permission 問題
+    agent any   // Use Agent Any
 
     environment {
         HOME = "${WORKSPACE}"
